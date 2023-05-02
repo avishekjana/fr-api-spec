@@ -1,0 +1,198 @@
+swagger: "2.0"
+
+#Meta info
+info:
+  version: "1.0"
+  title: "Foxivision FR"
+  description: |
+    FoxIVision FR is AI enabled a solution to compare two faces and generate report against it.
+    
+    Primary use case:
+    
+    Companies that provide on-field verification services often deal with a large number of documents and information that needs to be carefully scrutinized to ensure accuracy and authenticity. This is where the FR application steps in to compare faces in two documents. By leveraging advanced facial recognition technology, FR can quickly analyze images and compare them to one another, generating a detailed report that highlights any discrepancies or inconsistencies. 
+      
+basePath: "https://fr.foxivision.net/api"
+schemes:
+  - "https"
+security:
+  - ApiKeyAuth: []
+consumes:
+  - "multipart/form-data"
+produces:
+  - "application/json"  
+tags:
+  - name: "Face Match"
+
+# Paths
+paths:
+  /face_compares/simple:
+    post:
+      summary:  "Simple face compare"
+      security:
+        - ApiKeyAuth: []
+      description:  |
+        In simple face compare, you can compare two images of a person to find the similarities.
+      tags:
+        - "Face Match"
+      parameters:
+        - name: "case_reference_no"
+          in: formData
+          description: Case reference number
+          required: true
+          type: string            
+        - name: "image_a"
+          in: formData
+          description: First image
+          required: true
+          type: file      
+        - name: "image_b"
+          in: formData
+          description: Second image
+          required: true
+          type: file                
+      responses:
+        "200":
+          description:  "Status-Code: 200 OK"
+          schema:
+            $ref: "#/definitions/SimpleFaceCompareResponse"
+        "401":
+          description:  "Status-Code: 401 unauthorized"
+          schema:
+            type: string
+            example: "Unauthorised"         
+        "422":
+          description:  "Status-Code: 422"
+          schema:
+            type: string
+            example: "Unprocessable entity"                     
+  /face_compares/advance:
+    post:
+      summary:  "Advance face compare"
+      security:
+        - ApiKeyAuth: []
+      description:  |
+        With advanced face comparison technology, it is now possible to send multiple images of a person (LIVE photo and image of other documents of that person) and receive a detailed report on the match percentages of all possible combinations of documents.
+      tags:
+        - "Face Match"
+      parameters:
+        - name: "case_reference_no"
+          in: formData
+          description: Case reference number
+          required: true
+          type: string            
+        - name: "live_photo"
+          in: formData
+          description: LIVE photo
+          required: false
+          type: file      
+        - name: "pan_card"
+          in: formData
+          description: Photo of PAN Card
+          required: false
+          type: file  
+        - name: "aadhar_card"
+          in: formData
+          description: Photo of Aadhaar card
+          required: false
+          type: file  
+        - name: "driving_licence"
+          in: formData
+          description: Photo of driving license
+          required: false
+          type: file            
+        - name: "voter_card"
+          in: formData
+          description: Photo of voter card
+          required: false
+          type: file                      
+        - name: "passport"
+          in: formData
+          description: Photo of passport
+          required: false
+          type: file                      
+        - name: "other_photo"
+          in: formData
+          description: Any other photo
+          required: false
+          type: file                                
+          
+      responses:
+        "200":
+          description:  "Status-Code: 200 OK"
+          schema:
+            $ref: "#/definitions/AdvanceFaceCompareResponse"
+        "401":
+          description:  "Status-Code: 401 unauthorized"
+          schema:
+            type: string
+            example: "Unauthorised"         
+        "422":
+          description:  "Status-Code: 422"
+          schema:
+            type: string
+            example: "Unprocessable entity"                                 
+  
+# Definitions
+definitions:
+  # User payload samples
+
+  SimpleFaceCompareResponse:
+    type: "object"
+    properties:
+      id:
+        type: integer
+        example: 123
+      case_reference_no:
+        type: string
+        example: CS123
+      match_percentage:
+        type: number
+        example: 80.5
+      remarks:
+        type: string
+        example: Matched
+      processed_at:
+        type: string
+        example: "2023-05-02 4:00 PM"
+      report_file_url:
+        type: string
+        example: "https://cdn.fr.foxivision.net/reports/SFM234567"
+  AdvanceFaceCompareResponse:
+    type: "object"
+    properties:
+      id:
+        type: integer
+        example: 123
+      case_reference_no:
+        type: string
+        example: CS123
+      processed_at:
+        type: string
+        example: "2023-05-02 4:00 PM"
+      report_file_url:
+        type: string
+        example: "https://cdn.fr.foxivision.net/reports/SFM234567"
+      comparisions:
+        type: array
+        items:
+          $ref: '#/definitions/Comparision'
+  Comparision:
+    type: object
+    properties:
+      image_a:
+        type: string
+        example: Voter Card
+      image_b:
+        type: string
+        example: Driving Licence
+      match_percentage:
+        type: number
+        example: 80.5
+      remarks:
+        type: string
+        example: Matched  
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: Authorization
